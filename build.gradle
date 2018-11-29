@@ -1,0 +1,42 @@
+import java.sql.DriverManager
+
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+configurations {
+    liquibase
+    sqlDriver
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    liquibase 'postgresql:postgresql:9.1-901-1.jdbc4'
+    liquibase 'org.liquibase:liquibase-core:3.2.2'
+    sqlDriver 'postgresql:postgresql:9.1-901-1.jdbc4'
+}
+task(runMain, dependsOn: 'classes', type: JavaExec) {
+    main = 'com.tsarkov.parser.Client'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
+task updateDb(type: JavaExec) {
+    group = "Liquibase"
+    classpath configurations.liquibase
+    main = "liquibase.integration.commandline.Main"
+    args "--changeLogFile=src/main/resources/db/changelog/1/changelog-master.xml"
+    args "--username=pars"
+    args "--password=qwe123"
+    args "--url=jdbc:postgresql://127.0.0.1:5432/parser"
+    args "--driver=org.postgresql.Driver"
+    args "--logLevel=debug"
+    args "--defaultSchemaName=public"
+    args "update"
+}
